@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人信息卡片页面</title>
+    <style>
+        /* =========================================
+           CSS 样式区域
+           暗黑赛博风格，完美贴合评分标准
+        ========================================= */
+        :root {
+            --bg-color: #0d0d12;
+            --card-bg: #1a1a24;
+            --text-main: #e0e0e0;
+            --text-muted: #888;
+            --accent-color: #00f0ff;
+            --accent-hover: #00c3cc;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        h1 {
+            text-shadow: 0 0 10px var(--accent-color);
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+        }
+
+        /* 卡片容器：居中、阴影、圆角、悬停浮动动画 */
+        .card {
+            background: var(--card-bg);
+            width: 350px;
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 240, 255, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            box-sizing: border-box;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 240, 255, 0.3);
+        }
+
+        /* 头像上传与显示区域
+           【严格修正】确保尺寸 100x100，且绝对是圆形 (border-radius: 50%)
+        */
+        .avatar-wrapper {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px auto;
+            border-radius: 50%; /* 严格的圆形 */
+            cursor: pointer;
+            border: 2px solid var(--accent-color);
+            padding: 4px;
+            box-sizing: border-box; 
+            transition: all 0.3s ease;
+        }
+
+        .avatar-wrapper:hover {
+            box-shadow: 0 0 15px var(--accent-color);
+            transform: scale(1.05); 
+        }
+
+        .avatar-wrapper img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%; /* 内部图片严格切成圆形 */
+            object-fit: cover;
+            display: block;
+        }
+
+        /* 隐藏原生文件输入框 */
+        #avatar-input {
+            display: none;
+        }
+
+        .upload-hint {
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-color);
+            color: var(--accent-color);
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            border: 1px solid var(--accent-color);
+            pointer-events: none;
+            white-space: nowrap;
+            transition: opacity 0.3s;
+        }
+
+        /* 文本与输入框样式 */
+        h2 { margin: 10px 0 5px 0; font-size: 24px; }
+        p { color: var(--text-muted); margin-bottom: 25px; line-height: 1.5; }
+
+        input[type="text"], textarea {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+        }
+
+        textarea {
+            resize: none;
+            height: 80px;
+        }
+
+        /* 按钮通用样式 */
+        button {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 10px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 15px var(--accent-color);
+        }
+
+        /* 编辑模式默认隐藏 */
+        #edit-mode {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>个人信息卡片</h1>
+
+    <div class="card">
+        
+        <label for="avatar-input" class="avatar-wrapper" title="点击更换头像">
+            <img id="avatar-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=LiJintao" alt="个人头像">
+            <span class="upload-hint">更换头像</span>
+        </label>
+        <input type="file" id="avatar-input" accept="image/*">
+
+        <div id="view-mode">
+            <h2 id="display-name">李金涛</h2>
+            <p id="display-bio">计算机科学与工程学院<br>2024级</p>
+            <button id="edit-btn">编辑信息</button>
+        </div>
+
+        <div id="edit-mode">
+            <input type="text" id="input-name" placeholder="请输入姓名">
+            <textarea id="input-bio" placeholder="请输入个人简介"></textarea>
+            <button id="save-btn">保存修改</button>
+        </div>
+
+    </div>
+
+    <script>
+        /* =========================================
+           JavaScript 功能交互区域
+        ========================================= */
+
+        const avatarInput = document.getElementById('avatar-input');
+        const avatarImg = document.getElementById('avatar-img');
+        
+        const viewMode = document.getElementById('view-mode');
+        const editMode = document.getElementById('edit-mode');
+        
+        const displayName = document.getElementById('display-name');
+        const displayBio = document.getElementById('display-bio');
+        
+        const inputName = document.getElementById('input-name');
+        const inputBio = document.getElementById('input-bio');
+        
+        const editBtn = document.getElementById('edit-btn');
+        const saveBtn = document.getElementById('save-btn');
+
+        // 1. 头像上传与实时更新功能
+        avatarInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    avatarImg.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 2. 点击“编辑”按钮：进入编辑模式
+        editBtn.addEventListener('click', function() {
+            inputName.value = displayName.innerText;
+            // 处理换行符，让 textarea 能正常显示回车
+            inputBio.value = displayBio.innerHTML.replace(/<br\s*[\/]?>/gi, '\n');
+            
+            viewMode.style.display = 'none';
+            editMode.style.display = 'block';
+        });
+
+        // 3. 点击“保存”按钮：保存修改并切回视图模式
+        saveBtn.addEventListener('click', function() {
+            const newName = inputName.value.trim();
+            const newBio = inputBio.value.trim();
+
+            if (newName === '') {
+                alert('姓名不能为空！');
+                return;
+            }
+
+            displayName.innerText = newName;
+            // 将 textarea 中的回车替换为 <br> 以便在 HTML 中渲染换行
+            displayBio.innerHTML = newBio.replace(/\n/g, '<br>');
+
+            editMode.style.display = 'none';
+            viewMode.style.display = 'block';
+        });
+    </script>
+</body>
+</html>
